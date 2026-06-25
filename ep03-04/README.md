@@ -4,8 +4,45 @@
 
 ## 環境需求
 
-- Docker Desktop（[下載](https://www.docker.com/products/docker-desktop/)）
+### 方法一：Docker Desktop（推薦初學者）
+
+- [下載 Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - Windows 用戶：確認 WSL Integration 已開啟
+
+### 方法二：Docker Engine（不用 Desktop）
+
+Docker Engine 可完全取代 Docker Desktop，更輕量。
+
+```bash
+# 安裝 Docker Engine（WSL Ubuntu）
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+  -o /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) \
+  signed-by=/etc/apt/keyrings/docker.asc] \
+  https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io \
+  docker-buildx-plugin docker-compose-plugin
+
+# 修復 iptables（Ubuntu 22.04+ 必要）
+sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
+
+# 加入 docker group + 啟動
+sudo usermod -aG docker $USER
+sudo service docker start
+
+# 驗證
+docker --version && docker compose version
+```
+
+**自動啟動：** 編輯 `/etc/wsl.conf` 加入 `[boot]\nsystemd=true`，然後 `wsl --shutdown` 重啟，再 `sudo systemctl enable docker`。
+
+**Mac 替代方案：** `brew install colima docker docker-compose && colima start`
 
 ## 快速開始
 
