@@ -184,12 +184,16 @@ sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 ⚠️ **切換後一定要重啟 Docker daemon**（實測重點）：安裝 docker-ce 時 daemon 已經以舊的 nftables 啟動了，不重啟的話 iptables chain 不會重建，之後 `docker compose up` 會報 `iptables: No chain/target/match by that name` / `DOCKER-FORWARD` 錯誤。
 
 ```bash
-# 有 systemd（已啟用）
-sudo systemctl restart docker
-
-# 沒 systemd
+# 全新 WSL 預設沒有 systemd → 用 service（這步用這個就對了）
 sudo service docker restart
 ```
+
+> 💡 systemd 預設是**關閉**的，要到後面「啟用 systemd」那節自己開。如果你**還沒**做那節（大多數情況），這裡就用 `sudo service docker restart`。
+> 已經啟用 systemd 的話，改用 `sudo systemctl restart docker`。
+> 不確定有沒有 systemd？執行：
+> ```bash
+> systemctl list-unit-files >/dev/null 2>&1 && echo "有 systemd → 用 systemctl" || echo "沒有 → 用 service"
+> ```
 
 ✅ **驗證**：
 
@@ -231,14 +235,13 @@ docker ps
 ### Step 8：啟動 Docker
 
 ```bash
-# 沒 systemd
+# 全新 WSL 預設用這個（沒有 systemd）
 sudo service docker start
-
-# 有 systemd（已啟用，見下一節）
-sudo systemctl start docker
 ```
 
-💡 註：如果安裝過程中 daemon 已自動啟動（systemd 環境會），你在 Step 6 已經 `restart` 過就不用再 start。
+💡 註：
+- 你在 Step 6 已經 `service docker restart` 過了，daemon 通常已經在跑，這步只是確保它啟動。
+- 如果之後照「啟用 systemd」那節開了 systemd，改用 `sudo systemctl start docker`。
 
 ✅ **驗證**：
 
@@ -793,11 +796,9 @@ failed to create network xxx_default
 **解法**：重啟 Docker daemon 讓它重建 chain（這是實測抓到的關鍵步驟）：
 
 ```bash
-# 有 systemd
-sudo systemctl restart docker
-
-# 沒 systemd
+# 全新 WSL 預設用這個
 sudo service docker restart
+# （已啟用 systemd 才改用 sudo systemctl restart docker）
 
 # 重啟後重試
 docker compose up -d
