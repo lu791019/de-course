@@ -139,11 +139,15 @@ docker compose restart <service>   # 重啟特定服務
 
 | 問題 | 解法 |
 |------|------|
-| `docker: command not found` | 開啟 Docker Desktop，確認 WSL Integration 有開 |
-| `Cannot connect to Docker daemon` | Docker Desktop 沒在跑，開啟它等啟動完成 |
+| `docker: command not found` | 開啟 Docker Desktop，確認 WSL Integration 有開；或用 Docker Engine 直接裝在 WSL（見上方方法二）|
+| `Cannot connect to Docker daemon` | Docker Desktop 沒在跑，開啟它等啟動完成；Engine 版用 `sudo service docker start` |
 | `port already in use` | `docker ps` 找到佔用的 container → `docker stop` |
-| `permission denied` | `sudo usermod -aG docker <username>` → 重開 Terminal |
+| `permission denied` | `sudo usermod -aG docker <username>` → `wsl --shutdown` 重開 |
 | build 很慢 | 第一次要下載基底 image，之後有快取會快 |
+| `docker compose up` 報 `iptables: No chain/target/match` / `DOCKER-FORWARD` | 切 iptables-legacy 後沒重啟 daemon。`sudo systemctl restart docker`（或 `sudo service docker restart`）後重試 |
+| phpMyAdmin 一直 Restarting，log 顯示 `exec format error` | `phpmyadmin:5.2` 是 amd64-only。**Windows WSL 學生不受影響**；Apple Silicon Mac 把 compose 裡 `phpmyadmin:5.2` 改成 `phpmyadmin:latest`（多架構）|
+
+> 完整 Docker Engine 安裝、systemd、Mac/Colima、架構問題、課前預載清單 → 見課程的 `Docker 安裝教學手冊（Docker_Engine_vs_Desktop.md）`
 
 ## 檔案說明
 
