@@ -659,6 +659,7 @@ services:
     environment:
       - TZ=Asia/Taipei
       - RABBITMQ_HOST=rabbitmq
+      - PYTHONPATH=/app
     depends_on:
       - rabbitmq
     volumes:
@@ -671,6 +672,7 @@ services:
     environment:
       - TZ=Asia/Taipei
       - RABBITMQ_HOST=rabbitmq
+      - PYTHONPATH=/app
     depends_on:
       - rabbitmq
 
