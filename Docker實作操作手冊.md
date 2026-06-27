@@ -371,7 +371,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin:5.2
+    image: phpmyadmin:latest
     container_name: phpmyadmin
     ports:
       - "8000:80"
@@ -599,7 +599,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin:5.2
+    image: phpmyadmin:latest
     container_name: phpmyadmin
     restart: always
     ports:
@@ -612,7 +612,7 @@ services:
   worker:
     image: enzochang/data_ingestion:latest
     container_name: crawler_hahow_worker
-    command: uv run celery -A data_ingestion.worker worker --loglevel=info --hostname=worker%h
+    command: /app/.venv/bin/celery -A data_ingestion.worker worker --loglevel=info --hostname=worker%h
     restart: always
     environment:
       - TZ=Asia/Taipei
@@ -625,7 +625,7 @@ services:
   producer:
     image: enzochang/data_ingestion:latest
     container_name: crawler_hahow_producer
-    command: uv run python data_ingestion/producer_crawler_hahow_all.py
+    command: /app/.venv/bin/python data_ingestion/producer_crawler_hahow_all.py
     environment:
       - TZ=Asia/Taipei
       - RABBITMQ_HOST=rabbitmq

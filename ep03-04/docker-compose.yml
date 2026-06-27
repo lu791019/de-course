@@ -31,7 +31,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin:5.2
+    image: phpmyadmin:latest
     container_name: phpmyadmin
     ports:
       - "8000:80"
