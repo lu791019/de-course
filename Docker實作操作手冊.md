@@ -198,7 +198,8 @@ docker build -t fastapi-demo .
 ✅ **預期**：最後看到
 
 ```
-naming to docker.io/library/fastapi-demo:latest done
+naming to docker.io/library/fastapi-demo:latest
+可能是舊版，業師在確認
 ```
 
 ```bash
@@ -321,9 +322,9 @@ docker ps -a    # 看到剛才的 test-app container（Exited）
 
 ---
 
-## 第四部分：Docker Compose 整合版
+## 第四部分：Docker Compose — de-test/ep03-04（4 服務 infra）
 
-一個 `docker-compose.yml` 一次啟動多個服務。de-test 的 ep03-04 用**整合版**（所有服務寫在同一個檔案）。
+de-test 的 `ep03-04/docker-compose.yml` 只包含 **4 個基礎服務**（不含 worker/producer）。適合教 Compose 基本概念。
 
 ### 情境
 
@@ -336,6 +337,53 @@ cd ~/de-01-projects/de-test/ep03-04
 cat docker-compose.yml
 ```
 
+```yaml
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "worker"
+      RABBITMQ_DEFAULT_PASS: "worker"
+
+  flower:
+    image: mher/flower:latest
+    container_name: flower
+    ports:
+      - "5555:5555"
+    depends_on:
+      - rabbitmq
+    command: ["celery", "--broker=amqp://worker:worker@rabbitmq:5672//", "flower", "--port=5555"]
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: mydb
+      MYSQL_ROOT_PASSWORD: 1234
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2
+    container_name: phpmyadmin
+    ports:
+      - "8000:80"
+    environment:
+      PMA_HOST: mysql
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
+```
+
 四個服務：
 
 | 服務 | Image | Port | 用途 |
@@ -343,20 +391,18 @@ cat docker-compose.yml
 | rabbitmq | rabbitmq:3-management | 5672 / 15672 | 訊息佇列（管理介面 15672）|
 | flower | mher/flower | 5555 | Celery 任務監控 |
 | mysql | mysql:8.0 | 3306 | 資料庫 |
-| phpmyadmin | phpmyadmin:5.2 | 8000 | 資料庫管理介面 |
+| phpmyadmin | phpmyadmin/phpmyadmin:5.2 | 8000 | 資料庫管理介面 |
 
-> ⚠️ **Apple Silicon Mac 老師**：`phpmyadmin:5.2` 只有 amd64，arm64 會 `exec format error`。本機把該行改成 `phpmyadmin:latest`。學生 Windows WSL 不受影響。
+> ⚠️ **Apple Silicon Mac 老師**：`phpmyadmin/phpmyadmin:5.2` 只有 amd64，arm64 會 `exec format error`。本機把該行改成 `phpmyadmin:latest`。學生 Windows WSL（amd64）不受影響。
 
 ### Step 2：一行啟動所有服務
 
 ```bash
+cd ~/de-01-projects/de-test/ep03-04
 docker compose up -d
 ```
 
-- `up`：啟動
-- `-d`：背景執行
-
-✅ **預期**（實測）：
+✅ **預期**：
 
 ```
 Container rabbitmq   Started
@@ -375,13 +421,15 @@ docker compose ps
 
 ✅ 四個服務 STATUS 都是 `Up`。
 
-### Step 4：打開各服務的 web 介面（實測都 HTTP 200）
+### Step 4：打開各服務的 web 介面
 
 | 服務 | 網址 | 帳密 |
 |------|------|------|
 | RabbitMQ 管理 | http://localhost:15672 | worker / worker |
 | Flower 監控 | http://localhost:5555 | （無）|
 | phpMyAdmin | http://localhost:8000 | root / 1234 |
+
+✅ 實測 RabbitMQ 和 Flower 都 HTTP 200。
 
 ### Step 5：看 log
 
@@ -403,21 +451,38 @@ docker compose down -v
 
 ---
 
-## 第五部分：Docker Compose 分開版（de-project）
+## 第五部分：Docker Compose — de-project（6 服務完整版）
 
-de-project 用**分開版** —— 每個服務一個 compose file，一次加一個。適合逐步除錯、彈性組合。
+de-project 是**真實的資料工程專案**，比 ep03-04 多了 **worker**（執行爬蟲）和 **producer**（發送任務）。有兩種用法：分開版（4 個 compose file）和整合版（1 個 compose file）。
+
+### 專案架構
+
+```
+Producer 發任務 → RabbitMQ 排隊 → Worker 執行爬蟲 → MySQL 儲存
+                                   ↑
+                              Flower 監控
+                              phpMyAdmin 管理 DB
+```
 
 ### Step 1：取得 de-project
 
 ```bash
-cd ~/de-01-projects
+cd ~
 git clone https://github.com/DataEngCamp/de-project.git
 cd de-project
-ls docker-compose-*.yml
-# docker-compose-broker.yml  -mysql.yml  -worker.yml  -producer.yml
+ls
+# Dockerfile  docker-compose-broker.yml  docker-compose-mysql.yml
+# docker-compose-worker.yml  docker-compose-producer.yml
+# docker-compose.yml（整合版）  data_ingestion/  ...
 ```
 
-### Step 2：建立共用 network（關鍵！）
+---
+
+### 方法 A：分開版（4 個 compose file，逐步加服務）
+
+適合：教學逐步展示、除錯、彈性組合。
+
+#### A-1：建立共用 network（關鍵！）
 
 分開版的服務分散在不同 compose file，要靠一個**共用網路**互通。所有 compose file 都設了 `my_network: external: true`，所以要先手動建：
 
@@ -433,31 +498,32 @@ docker network ls | grep my_network
 
 > ⚠️ 不先建這個網路，`docker compose -f ... up` 會報 `network my_network declared as external, but could not be found`。
 
-### Step 3：第一個服務 — RabbitMQ + Flower（broker）
+#### A-2：RabbitMQ + Flower（broker）
 
 ```bash
 docker compose -f docker-compose-broker.yml up -d
 ```
 
-✅ **驗證**（實測 HTTP 200）：
+✅ **驗證**：
 - RabbitMQ 管理：http://localhost:15672 （worker / worker）
 - Flower 監控：http://localhost:5555
 
-### Step 4：第二個服務 — MySQL + phpMyAdmin
+#### A-3：MySQL + phpMyAdmin
 
 ```bash
 docker compose -f docker-compose-mysql.yml up -d
 ```
 
 ✅ **驗證**：
-- phpMyAdmin：http://localhost:8000
-- 也可從另一容器測 MySQL 連線（實測 `mysqld is alive`）：
+- phpMyAdmin：http://localhost:8000（root / 1234）
+- 也可從另一容器測 MySQL 連線：
   ```bash
   docker run --rm --network my_network mysql:8.0 \
     mysqladmin ping -h mysql -uroot -p1234
+  # mysqld is alive
   ```
 
-### Step 5：第三個服務 — Worker
+#### A-4：Worker
 
 ```bash
 docker compose -f docker-compose-worker.yml up -d
@@ -466,18 +532,18 @@ docker compose -f docker-compose-worker.yml logs -f
 
 > Worker 用的是 DockerHub 上預先 build 好的 image `enzochang/data_ingestion:latest`，第一次會自動 pull。
 
-### Step 6：發送任務 — Producer
+#### A-5：發送任務 — Producer
 
 ```bash
 docker compose -f docker-compose-producer.yml up
 # producer 跑完就結束（送出爬蟲任務）
 ```
 
-### Step 7：在 Flower 看任務執行
+#### A-6：在 Flower 看任務執行
 
 回到 http://localhost:5555 → Tasks 頁籤，看 Worker 接到任務並執行。
 
-### Step 8：停止所有服務
+#### A-7：停止所有服務
 
 ```bash
 docker compose -f docker-compose-broker.yml -f docker-compose-mysql.yml \
@@ -485,13 +551,145 @@ docker compose -f docker-compose-broker.yml -f docker-compose-mysql.yml \
 docker network rm my_network
 ```
 
-### 整合版 vs 分開版
+---
 
-| | 整合版（ep03-04）| 分開版（de-project）|
+### 方法 B：整合版（1 個 docker-compose.yml，一行啟動全部）
+
+把分開版的 4 個檔合成一個 `docker-compose.yml`，一行搞定，不需要手動建 network。
+
+#### B-1：看整合版 docker-compose.yml
+
+```bash
+cd ~/de-project
+cat docker-compose.yml
+```
+
+```yaml
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "worker"
+      RABBITMQ_DEFAULT_PASS: "worker"
+
+  flower:
+    image: mher/flower:latest
+    container_name: flower
+    ports:
+      - "5555:5555"
+    depends_on:
+      - rabbitmq
+    command: ["celery", "--broker=amqp://worker:worker@rabbitmq:5672//", "flower", "--port=5555"]
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: mydb
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-1234}
+    restart: always
+    volumes:
+      - mysql:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8000:80"
+    environment:
+      PMA_HOST: mysql
+    depends_on:
+      - mysql
+
+  worker:
+    image: enzochang/data_ingestion:latest
+    container_name: crawler_hahow_worker
+    command: uv run celery -A data_ingestion.worker worker --loglevel=info --hostname=worker%h
+    restart: always
+    environment:
+      - TZ=Asia/Taipei
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./output:/app/output
+
+  producer:
+    image: enzochang/data_ingestion:latest
+    container_name: crawler_hahow_producer
+    command: uv run python data_ingestion/producer_crawler_hahow_all.py
+    environment:
+      - TZ=Asia/Taipei
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - rabbitmq
+
+volumes:
+  mysql:
+```
+
+六個服務：
+
+| 服務 | Image | Port | 用途 |
+|------|-------|------|------|
+| rabbitmq | rabbitmq:3-management | 5672 / 15672 | 訊息佇列 |
+| flower | mher/flower | 5555 | Celery 任務監控 |
+| mysql | mysql:8.0 | 3306 | 資料庫 |
+| phpmyadmin | phpmyadmin/phpmyadmin:5.2 | 8000 | 資料庫管理 |
+| worker | enzochang/data_ingestion | — | 執行爬蟲（Celery Worker）|
+| producer | enzochang/data_ingestion | — | 發送爬蟲任務（一次性）|
+
+#### B-2：一行啟動全部
+
+```bash
+cd ~/de-project
+docker compose up -d
+```
+
+> 第一次會 pull 所有 image（約 2-3GB），需要時間。
+
+#### B-3：查看狀態 + web 介面
+
+```bash
+docker compose ps
+```
+
+介面同上：RabbitMQ `:15672`、Flower `:5555`、phpMyAdmin `:8000`
+
+#### B-4：停止全部
+
+```bash
+docker compose down -v
+```
+
+---
+
+### 分開版 vs 整合版
+
+| | 分開版（方法 A）| 整合版（方法 B）|
 |---|---|---|
-| 啟動 | `docker compose up` 一行 | 每個服務各一行 |
-| network | 自動建 | 手動 `docker network create` |
-| 適合 | 一鍵部署、教學 | 逐步除錯、彈性組合 |
+| 啟動 | 每個服務各一行 | `docker compose up` 一行 |
+| network | 手動 `docker network create` | 自動建 |
+| 適合 | 教學逐步展示、逐步除錯 | 一鍵部署、快速啟動 |
+| 內容 | 4 個 yaml（broker/mysql/worker/producer）| 1 個 yaml |
+
+### ep03-04 vs de-project
+
+| | ep03-04 | de-project |
+|---|---|---|
+| repo | de-test（教學用）| de-project（真實專案）|
+| 服務數 | 4 個（infra only）| 6 個（infra + worker + producer）|
+| compose 方式 | 只有整合版 | 分開版 + 整合版 |
+| worker/producer | 沒有 | 有（用 DockerHub image）|
+| 用途 | 學 compose 基本概念 | 學完整資料工程系統 |
 
 ---
 
