@@ -17,10 +17,10 @@
 
 | Repo | 內容 | 用在哪 |
 |------|------|--------|
-| [de-project-course](https://github.com/lu791019/de-project-course) | Hahow 課程爬蟲（Celery + RabbitMQ + MySQL + Airflow + BigQuery + Metabase） | EP05+ 主力 |
-| [crawler](https://github.com/TibameSam/crawler) | FinMind 股價爬蟲（多 Queue、Scheduler） | 對照參考 |
+| [crawler](https://github.com/TibameSam/crawler) | FinMind 股價爬蟲（漸進式教學設計，中文註解） | EP05+ 實作（學生動手） |
+| [de-project-course](https://github.com/lu791019/de-project-course) | Hahow 課程爬蟲（Airflow + BigQuery + Metabase 完整 pipeline） | 投影片教學（概念對照） |
 
-> 課堂以 **de-project-course** 為主要動手專案（涵蓋 EP04-20），crawler 作為對照參考。兩者是同一套架構、不同資料源。
+> 課堂以 **crawler** 為動手實作專案（簡單、漸進），**de-project-course** 用於投影片概念講解。兩者是同一套架構、不同資料源。
 
 ## 操作手冊
 
