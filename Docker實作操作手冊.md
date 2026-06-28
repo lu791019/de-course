@@ -989,19 +989,107 @@ docker system prune -a --volumes          # 刪所有未使用 image/network/vol
 
 ---
 
-## 實作檢核表（課堂帶學生跑）
+## Docker 指令速查表
 
-### EP03（Docker 基礎）
-- [ ] `docker run hello-world` 成功
-- [ ] 看懂 `docker ps` vs `docker ps -a`
-- [ ] FastAPI demo：build → run → 瀏覽器看到 /docs
-- [ ] de-test：build test-app → 容器內跑爬蟲
+### 基礎操作
 
-### EP04（Docker Compose）
-- [ ] ep03-04 整合版：`docker compose up -d` → 4 服務 web 介面都開得起來
-- [ ] ep03-04 拆掉後，de-project-course 分開版：建 network → broker → mysql
-- [ ] de-project-course 整合版：infra + worker up → producer 發任務 → Flower 看 SUCCESS → MySQL 有資料
+```bash
+# Image
+docker build -t <name> .                    # Build image
+docker images                               # 列出所有 image
+docker rmi <name>                           # 刪除 image
+docker pull <name>                          # 從 DockerHub 下載
+docker push <name>                          # 推上 DockerHub
+docker tag <src> <dst>                      # 給 image 加 tag
 
-### EP04 延伸（視時間）
-- [ ] DockerHub：login → tag → push → pull 測試
-- [ ] Portainer：安裝 → 網頁看 container
+# Container 生命週期
+docker run <image>                          # 跑 container
+docker run -d <image>                       # 背景執行
+docker run -it <image> bash                 # 互動模式
+docker run -p 8080:80 <image>               # port 映射
+docker run --name myapp <image>             # 命名
+docker run --rm <image>                     # 跑完自動刪除
+docker ps                                   # 看正在跑的
+docker ps -a                                # 看全部（含已停止）
+docker stop <id>                            # 停止
+docker start <id>                           # 重新啟動
+docker rm <id>                              # 刪除
+docker rm -f <id>                           # 強制刪除（含執行中）
+
+# 查看與除錯
+docker logs <id>                            # 看 log
+docker logs -f <id>                         # 即時跟蹤 log
+docker logs --tail 20 <id>                  # 最後 20 行
+docker exec -it <id> bash                   # 進入正在跑的 container
+docker inspect <id>                         # 看詳細資訊（JSON）
+docker cp <id>:/path ./local                # 從 container 複製檔案出來
+
+# 清理
+docker system prune                         # 清理未使用資源
+docker system prune -a --volumes            # 清理全部（含 image + volume）
+docker image prune                          # 只清懸掛 image
+```
+
+### Docker Compose 操作
+
+```bash
+# 啟動與停止
+docker compose up -d                        # 背景啟動全部
+docker compose up -d <service>              # 只起特定服務
+docker compose up <service>                 # 前景跑（看即時輸出）
+docker compose down                         # 停止 + 移除 container/network
+docker compose down -v                      # 同上 + 刪 volume（資料庫清空）
+docker compose restart                      # 重啟全部
+docker compose restart <service>            # 重啟特定服務
+
+# 狀態與 log
+docker compose ps                           # 看服務狀態
+docker compose ps -a                        # 含已停止
+docker compose logs                         # 全部 log
+docker compose logs <service>               # 特定服務 log
+docker compose logs -f                      # 即時跟蹤
+docker compose logs --tail 20               # 最後 20 行
+
+# Build
+docker compose build                        # build 所有 build: . 的服務
+docker compose build --no-cache             # 不用快取從零 build
+docker compose up -d --build                # build + 啟動
+docker compose up -d --build --no-cache     # 從零 build + 啟動
+
+# 指定 compose 檔案
+docker compose -f docker-compose-local.yml up -d
+docker compose -f docker-compose-broker.yml up -d
+```
+
+### 進階操作
+
+```bash
+# Network
+docker network create <name>                # 建立網路
+docker network ls                           # 列出網路
+docker network rm <name>                    # 刪除網路
+docker network inspect <name>               # 看網路詳細（哪些 container 連在上面）
+
+# Volume
+docker volume create <name>                 # 建立 volume
+docker volume ls                            # 列出 volume
+docker volume rm <name>                     # 刪除 volume
+
+# 連線測試
+docker exec mysql mysqladmin ping -uroot -p1234         # 測 MySQL 連線
+docker exec mysql mysql -uroot -p1234 -e "SHOW DATABASES;"  # 查 database
+
+# Image 架構
+docker inspect <image> --format "{{.Architecture}}"     # 看 image 架構
+docker manifest inspect <image>                          # 看多架構 manifest
+
+# Compose scale（多 worker）
+docker compose up -d --scale worker=3                    # 開 3 個 worker
+
+# Docker daemon（WSL）
+sudo service docker start                               # 啟動（無 systemd）
+sudo service docker restart                              # 重啟
+sudo systemctl start docker                              # 啟動（有 systemd）
+sudo systemctl restart docker                            # 重啟
+sudo systemctl status docker                             # 看狀態
+```
