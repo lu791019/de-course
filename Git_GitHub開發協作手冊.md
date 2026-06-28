@@ -551,3 +551,141 @@ git push
 | 建分支 | `git checkout -b <name>` | 左下角 → **+ Create new branch** |
 | 切分支 | `git checkout <name>` | 左下角 → 選分支名 |
 | 查看歷史 | `git log` | Git Graph 擴充套件 |
+
+---
+
+## FAQ
+
+### Q1：git clone 失敗
+
+**常見原因和解法**：
+
+```bash
+# 1. 網路問題
+git clone https://github.com/lu791019/de-test.git
+# fatal: unable to access → 確認網路連線
+
+# 2. Private repo 需要認證
+# 用 HTTPS + Token：
+git clone https://<token>@github.com/xxx/yyy.git
+
+# 3. SSL 問題（公司網路）
+git config --global http.sslVerify false
+# ⚠️ 只在公司內部網路使用
+```
+
+### Q2：push 被拒（rejected）
+
+**原因**：遠端有新 commit，你的本地落後了。
+
+```bash
+# 先拉取遠端更新
+git pull origin main
+# 如果有衝突，解決衝突後再 push
+git push origin main
+```
+
+### Q3：git push 要輸入帳號密碼
+
+**解法**：設定 Git credential 快取
+
+```bash
+# 方法 1：快取 15 分鐘
+git config --global credential.helper cache
+
+# 方法 2：永久儲存（存明文，注意安全）
+git config --global credential.helper store
+
+# 方法 3：用 GitHub CLI（推薦）
+# 安裝 gh → gh auth login
+```
+
+### Q4：commit 訊息打錯了
+
+```bash
+# 修改最後一次 commit 的訊息
+git commit --amend -m "正確的訊息"
+# ⚠️ 只限還沒 push 的 commit
+```
+
+### Q5：不小心 commit 了不該上傳的檔案
+
+```bash
+# 從 Git 追蹤移除（檔案保留）
+git rm --cached 檔案名
+echo "檔案名" >> .gitignore
+git add .gitignore
+git commit -m "remove tracked file and add to gitignore"
+```
+
+### Q6：git status 顯示中文檔名亂碼
+
+```bash
+git config --global core.quotepath false
+```
+
+### Q7：merge 衝突怎麼解
+
+```bash
+# 1. git pull 後出現 CONFLICT
+# 2. 打開衝突的檔案，看到：
+#    <<<<<<< HEAD
+#    你的版本
+#    =======
+#    別人的版本
+#    >>>>>>> branch_name
+# 3. 手動選擇要保留哪個（或合併）
+# 4. 刪掉 <<<< ==== >>>> 標記
+# 5. git add 衝突的檔案
+# 6. git commit
+```
+
+### Q8：怎麼回到之前的版本？
+
+```bash
+# 看歷史
+git log --oneline
+
+# 回到特定 commit（只是「看看」，不影響歷史）
+git checkout <commit-hash>
+
+# 回到最新
+git checkout main
+
+# 真的要撤回（⚠️ 會產生新 commit）
+git revert <commit-hash>
+```
+
+### Q9：git pull 時出現 "divergent branches"
+
+```bash
+# 設定 pull 策略
+git config --global pull.rebase false  # merge（預設）
+# 或
+git config --global pull.rebase true   # rebase
+```
+
+### Q10：GitHub 第一次 push 跳出認證窗口
+
+**答**：這是正常的。GitHub 現在不接受密碼認證，需要用 Personal Access Token（PAT）：
+
+1. GitHub → Settings → Developer settings → Personal access tokens → Generate new token
+2. 勾選 `repo` 權限
+3. 複製 Token，在認證窗口貼上（不是你的 GitHub 密碼）
+
+### Q11：怎麼看某行程式是誰寫的？
+
+```bash
+git blame 檔案名
+# 或用 VS Code 的 GitLens extension → 每行右邊會顯示
+```
+
+### Q12：git add . 加了太多檔案怎麼辦？
+
+```bash
+# 取消暫存（檔案保留）
+git reset HEAD 檔案名
+
+# 取消所有暫存
+git reset HEAD
+```

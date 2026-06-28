@@ -15,6 +15,7 @@
 - [第八部分 Compose 部署 Nginx](#第八部分-compose-部署-nginx)
 - [第九部分 Docker vs Docker Compose 比較](#第九部分-docker-vs-docker-compose-比較)
 - [指令速查表](#指令速查表)
+- [FAQ](#faq)
 
 ---
 
@@ -794,3 +795,112 @@ docker compose up -d
 | `docker compose down` | 停止 + 刪除容器和網路 |
 | `docker compose down -v` | 停止 + 刪除容器、網路和 volumes |
 | `docker compose up -d --force-recreate` | 重新建立容器 |
+
+---
+
+## FAQ
+
+### Q1：docker compose up 後服務沒有啟動
+
+```bash
+# 1. 看狀態
+docker compose ps
+# 看哪個服務的 STATE 不是 running
+
+# 2. 看 log
+docker compose logs <service_name>
+# 找出錯誤訊息
+
+# 3. 驗證 yml 語法
+docker compose config
+```
+
+### Q2：yml 格式錯誤
+
+YAML 對縮排非常敏感：
+- 用空格，不要用 Tab
+- 同層級要對齊
+- `:` 後面要有空格
+
+### Q3：services 之間連不到彼此
+
+```bash
+# 確認 network 設定正確
+docker network ls
+
+# 如果用拆開版，確認都加入同一個 network
+# 每個 compose file 都要有：
+# networks:
+#   my_network:
+#     external: true
+
+# 確認 network 已建好
+docker network create my_network
+```
+
+### Q4：volumes 的資料不見了
+
+```bash
+# docker compose down 預設不會刪 volume
+# 但如果加了 -v 就會刪！
+docker compose down      # ✅ volume 保留
+docker compose down -v   # ❌ volume 也刪掉
+```
+
+### Q5：depends_on 不保證服務「準備好」
+
+`depends_on` 只保證啟動順序，不保證服務完全就緒。MySQL 可能已啟動但還在初始化。
+
+**解法**：設定 `healthcheck` 或在應用程式裡加重試邏輯。
+
+### Q6：怎麼只重建某個服務的 image
+
+```bash
+docker compose build <service_name>
+docker compose up -d <service_name>
+
+# 或一步完成
+docker compose up -d --build <service_name>
+```
+
+### Q7：docker compose logs 太多怎麼過濾
+
+```bash
+# 只看最後 100 行
+docker compose logs --tail 100 <service>
+
+# 即時追蹤
+docker compose logs -f <service>
+
+# 加時間戳
+docker compose logs -t <service>
+```
+
+### Q8：怎麼更新 docker-compose.yml 後套用
+
+```bash
+# 修改 yml 後，重新啟動
+docker compose up -d
+# Docker Compose 會自動偵測變更，只重建有改動的服務
+```
+
+### Q9：多個 compose file 怎麼整合
+
+```bash
+# 方法 1：逐個啟動（拆開版）
+docker compose -f docker-compose-broker.yml up -d
+docker compose -f docker-compose-mysql.yml up -d
+
+# 方法 2：合併指定
+docker compose -f docker-compose-broker.yml -f docker-compose-mysql.yml up -d
+```
+
+### Q10：docker compose 排錯 SOP
+
+```
+Step 1: docker compose ps           → 哪個服務掛了？
+Step 2: docker compose logs <svc>   → 看 log 找錯誤訊息
+Step 3: docker network ls           → network 建好了嗎？
+Step 4: docker compose config       → yml 語法正確嗎？
+Step 5: docker compose down && docker compose up -d → 砍掉重練
+```

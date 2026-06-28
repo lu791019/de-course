@@ -728,6 +728,39 @@ systemd=true
 
 如果有但還是報錯 → 需要在 **PowerShell** 執行 `wsl --shutdown`，然後重新打開 WSL。
 
+### Q12.5：container 一啟動就馬上結束（`docker ps` 看不到，`docker ps -a` 是 Exited）
+
+**原因**：container 的主程序（CMD / ENTRYPOINT）跑完就結束了。container 只在主程序「常駐前景」時才會持續存在，主程序一退出 container 就停。
+
+**檢查**：
+
+```bash
+# 看退出代碼和原因
+docker ps -a
+# STATUS 欄看 Exited (0) = 正常跑完；Exited (非0) = 報錯
+
+# 看 log 找真正原因
+docker logs <container_id>
+```
+
+**常見情況與解法**：
+- **服務型程式被 daemon 化**（例如背景跑）→ 改成前景執行（如 `nginx -g 'daemon off;'`、`CMD ["python", "app.py"]` 不要加 `&`）
+- **只是想進去看看** → 用互動模式不要讓它跑完就退：`docker run -it <image> bash`
+- **Exited (非0) 且 log 有錯** → 照 log 的錯誤訊息修（缺檔案、port 被佔、環境變數沒設等）
+
+### Q12.6：防毒軟體擋住 Docker（daemon 起不來、WSL 連不上、安裝失敗）
+
+**原因**：部分防毒 / 端點防護軟體（常見：某些企業版防毒、特定第三方防火牆）會攔截 Docker 的虛擬網路或 WSL 行為，導致 daemon 啟動失敗或指令連不上。
+
+**判斷**：暫時關閉防毒後同樣的指令就正常 → 多半就是防毒攔截。
+
+**解法**：
+1. 把 WSL 的 Docker 執行路徑 / `dockerd` 加入防毒白名單（排除清單）
+2. 若是企業電腦無權限改防毒 → 聯絡 IT 開白名單，或改用本文件的 WSL Engine 安裝（比 Docker Desktop 較少被擋）
+3. 不要長期關閉防毒，加白名單即可
+
+⚠️ 關防毒只用來「確認是不是它造成的」，確認後請加白名單再開回防毒。
+
 ---
 
 ## FAQ：網路與 Port 問題
@@ -807,6 +840,40 @@ docker network create test-net && docker network rm test-net
 # 能成功建立/刪除 = chain 已正常
 ```
 
+### Q14.6：container 內部連不到外網（`apt update` / `pip install` / `npm install` 在 build 或 container 裡失敗）
+
+**症狀**：在 container 內部（或 `docker build` 的 RUN 階段）裝套件時報 `Could not resolve host`、`Temporary failure in name resolution`、`Connection timed out`。
+
+**檢查**：
+
+```bash
+# 進 container 測 DNS 與外網
+docker run --rm alpine sh -c "nslookup google.com; wget -qO- https://download.docker.com >/dev/null && echo OK"
+```
+
+**常見原因與解法**：
+- **DNS 解析不了** → 指定 DNS 跑：`docker run --dns 8.8.8.8 ...`；或長期設定 `/etc/docker/daemon.json`：
+  ```json
+  { "dns": ["8.8.8.8", "1.1.1.1"] }
+  ```
+  改完重啟 daemon（`sudo service docker restart` 或 `sudo systemctl restart docker`）。
+- **公司 / 學校網路有 proxy** → 在 `~/.docker/config.json` 或 daemon 設定 proxy（`HTTP_PROXY` / `HTTPS_PROXY`）。
+- **iptables FORWARD 被擋** → 見 Q14.5，多半重啟 daemon 即可。
+
+### Q14.7：`docker pull` 一直逾時 / retrying（TLS handshake timeout、i/o timeout）
+
+**原因**：連 Docker Hub 的網路太慢或被擋（常見於現場網路塞車、防火牆、或 Hub 限速）。
+
+**解法**：
+1. **重試**：`docker pull` 會斷點續傳，多跑幾次通常會過。
+2. **課前預載**：依本文件「課前準備：下載清單與預載」一次拉完，避免現場塞車。
+3. **設定 registry mirror**（網路慢時最有效）→ `/etc/docker/daemon.json`：
+   ```json
+   { "registry-mirrors": ["https://mirror.gcr.io"] }
+   ```
+   改完重啟 daemon。
+4. **確認 DNS / proxy** → 見 Q14.6。
+
 ---
 
 ## FAQ：效能與檔案問題
@@ -850,6 +917,59 @@ autoMemoryReclaim=gradual
 ```
 
 然後在 PowerShell 執行 `wsl --shutdown`，重新打開 WSL。
+
+### Q17.5：`no space left on device`（build / pull / run 報磁碟空間不足）
+
+**原因**：累積太多沒用的 image / container / volume / build 快取，把磁碟塞滿。
+
+**檢查**：
+
+```bash
+docker system df          # 看 Docker 各類資源各佔多少
+df -h                     # 看整顆磁碟剩多少
+```
+
+**解法**（由溫和到激進）：
+
+```bash
+# 1. 清掉停止的 container、未使用的網路、懸空 image、build 快取
+docker system prune
+
+# 2. 連「沒有被任何 container 用到的 image」一起清（會清比較多）
+docker system prune -a
+
+# 3. 連 volume 也清（⚠️ 會刪資料，確認沒重要資料才做）
+docker system prune -a --volumes
+```
+
+⚠️ WSL 另一個常見元凶是 WSL 虛擬磁碟膨脹 → 清完 Docker 後磁碟仍滿，需另外壓縮 WSL vhdx（`wsl --shutdown` 後用 `diskpart` 的 `compact vdisk`，或 `wsl --manage <distro> --resize`）。
+
+### Q17.6：`docker build` 在某個 `RUN` 指令失敗
+
+**怎麼看真正錯在哪**：build 輸出會標 `=> ERROR [n/m] RUN ...`，錯誤訊息就在那一段下面。先看清楚是哪個 RUN、報什麼。
+
+**常見原因與解法**：
+- **裝套件時連不到外網**（`apt update` / `pip install` 失敗）→ 見 Q14.6。
+- **指令在 base image 裡不存在**（例如 slim image 沒有 `gcc`、`git`）→ 在前面加一條 `RUN apt-get update && apt-get install -y <工具>`。
+- **快取造成裝到舊東西** → `docker build --no-cache -t <name> .` 重建。
+- **debug 技巧**：用最後一個成功的 layer image id 進去手動試：`docker run -it <上一層的image_id> bash`，在裡面手動跑那條失敗的指令看完整錯誤。
+
+### Q17.7：怎麼把檔案複製進 / 出 container（`docker cp`）
+
+**用 `docker cp`**，不需要進 container：
+
+```bash
+# 從 container 複製檔案出來到主機
+docker cp <container_id>:/app/output.log ./output.log
+
+# 從主機複製檔案進 container
+docker cp ./config.json <container_id>:/app/config.json
+
+# 整個資料夾也可以
+docker cp <container_id>:/app/logs ./logs
+```
+
+> container 已經停止（Exited）也能 `docker cp`，不必先啟動。
 
 ---
 
