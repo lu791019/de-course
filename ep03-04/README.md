@@ -131,7 +131,7 @@ CMD ["/bin/bash"]                  # 預設開 bash
 
 本資料夾使用**整合版** docker-compose.yml（所有服務寫在同一個檔案）。
 
-[hahow-crawler](https://github.com/lu791019/hahow-crawler) 有**拆開版**（每個服務一個 compose file）。差別：
+[hahow-crawler](https://github.com/lu791019/hahow-crawler-de-course-materials) 有**拆開版**（每個服務一個 compose file）。差別：
 
 | | 整合版（本資料夾） | 拆開版（hahow-crawler） |
 |---|---|---|

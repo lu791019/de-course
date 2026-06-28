@@ -17,8 +17,8 @@
 
 | Repo | 內容 | 用在哪 |
 |------|------|--------|
-| [stock-crawler](https://github.com/lu791019/stock-crawler) | FinMind 股價爬蟲（漸進式教學設計，中文註解） | EP05+ 實作（學生動手） |
-| [hahow-crawler](https://github.com/lu791019/hahow-crawler) | Hahow 課程爬蟲（Airflow + BigQuery + Metabase 完整 pipeline） | 投影片教學（概念對照） |
+| [stock-crawler](https://github.com/lu791019/stock-crawler-de-course-materials) | FinMind 股價爬蟲（漸進式教學設計，中文註解） | EP05+ 實作（學生動手） |
+| [hahow-crawler](https://github.com/lu791019/hahow-crawler-de-course-materials) | Hahow 課程爬蟲（Airflow + BigQuery + Metabase 完整 pipeline） | 投影片教學（概念對照） |
 
 > 課堂以 **crawler** 為動手實作專案（簡單、漸進），**hahow-crawler** 用於投影片概念講解。兩者是同一套架構、不同資料源。
 

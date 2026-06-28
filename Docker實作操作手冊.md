@@ -524,7 +524,7 @@ Producer 發任務 → RabbitMQ 排隊 → Worker 執行爬蟲 → MySQL 儲存
 
 ```bash
 cd ~
-git clone https://github.com/lu791019/hahow-crawler.git
+git clone https://github.com/lu791019/hahow-crawler-de-course-materials.git
 cd hahow-crawler
 ls
 # Dockerfile  docker-compose-broker.yml  docker-compose-mysql.yml
@@ -571,7 +571,7 @@ docker compose up -d            # 再起 hahow-crawler
 
 | | ep03-04 | hahow-crawler |
 |---|---|---|
-| repo | [de-course](https://github.com/lu791019/de-course)（教學用）| [hahow-crawler](https://github.com/lu791019/hahow-crawler)（課程版）|
+| repo | [de-course](https://github.com/lu791019/de-course)（教學用）| [hahow-crawler](https://github.com/lu791019/hahow-crawler-de-course-materials)（課程版）|
 | 服務數 | 4 個（infra only）| 6 個（infra + worker + producer）|
 | compose 方式 | 只有整合版 | 分開版 + 整合版 A + 整合版 B |
 | worker/producer | 沒有 | 有 |
