@@ -1,54 +1,59 @@
-# EP02 — Python 環境管理 + Module / Package
+# EP02 — Git + GitHub + Python 環境 + Module/Package
 
-本資料夾是 EP02 教完後的狀態：在 EP01 的基礎上加了 uv 環境管理和 crawlers package。
+> EP02 的目標：學會 Git 協作流程、用 uv 管理 Python 環境、把散落的 .py 整理成 Package。
 
-## 環境需求
+## 本集做了什麼
 
-- Python 3.10+
-- [uv](https://docs.astral.sh/uv/)（Python 套件管理工具）
+| 段落 | 內容 |
+|------|------|
+| Git GUI | VS Code Source Control 操作（stage → commit → diff） |
+| GitHub | 建帳號 → 建 repo → push → clone |
+| VS Code Extension | GitLens、Error Lens、autoDocstring |
+| Python 環境管理 | 為什麼需要虛擬環境 → uv 安裝與操作 |
+| Module / Package | `if __name__` → `__init__.py` → crawlers package |
 
-## 快速開始
+## 環境建置
+
+### 安裝 uv
 
 ```bash
-# 1. 安裝 uv（如果還沒裝）
+# macOS / Linux（含 WSL）
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 2. 安裝套件
+# 重新載入 shell
+source ~/.bashrc    # 或 source ~/.zshrc
+
+# 驗證
+uv --version        # 預期：uv 0.x.x
+```
+
+### 用 uv 管理本專案
+
+```bash
+cd ~/de-01-projects/de-test/ep02
+
+# 根據 pyproject.toml + uv.lock 安裝所有套件
 uv sync
 
-# 3. 執行程式
+# 跑爬蟲（不用手動 activate！）
 uv run python ptt_crawler.py
 uv run python finmind.py
 ```
 
-## uv 環境管理
+### uv 常用指令
 
 ```bash
-# 查看 Python 版本
-uv python list --only-installed
-
-# 安裝指定 Python 版本
-uv python install 3.10
-
-# 建立虛擬環境
-uv venv --python 3.10
-
-# 安裝套件
-uv add pandas
-uv add requests
-
-# 移除套件
-uv remove pandas
-
-# 執行程式（自動使用虛擬環境）
-uv run python main.py
+uv init my-project          # 建立新專案
+uv add requests pandas      # 安裝套件（自動更新 pyproject.toml）
+uv remove pandas            # 移除套件
+uv run python main.py       # 在虛擬環境中執行
+uv sync                     # 根據 lock 檔同步套件
+uv python install 3.11      # 安裝指定 Python 版本
 ```
 
-## Module vs Package
+## Module / Package
 
 ### Module = 一個 .py 檔
-
-每個 .py 檔都是一個 module，可以直接執行或被 import：
 
 ```bash
 # 直接執行
@@ -56,21 +61,28 @@ uv run python ptt_crawler.py
 
 # 在 Python 裡 import
 >>> from ptt_crawler import ptt_crawler
->>> result = ptt_crawler("Stock")
 ```
 
-⚠️ 注意：原始的 ptt_crawler.py 底部有直接執行的程式碼，import 時會自動跑爬蟲。
+### `if __name__ == "__main__"` 的作用
+
+```python
+def ptt_crawler(board):
+    ...
+
+# 直接跑 → 會執行；被 import → 不會執行
+if __name__ == "__main__":
+    result = ptt_crawler("Stock")
+    print(result)
+```
 
 ### Package = 資料夾 + `__init__.py`
 
-`crawlers/` 資料夾就是一個 package：
-
 ```
-crawlers/
-├── __init__.py          ← 讓 Python 認這是 package
-├── ptt_crawler.py       ← 加了 if __name__ == "__main__"
-├── finmind.py           ← 加了 if __name__ == "__main__"
-└── hahow_crawler.py     ← 加了 if __name__ == "__main__"
+crawlers/                    ← Package
+├── __init__.py              ← 讓 Python 認這是 package
+├── ptt_crawler.py           ← 加了 if __name__
+├── finmind.py
+└── hahow_crawler.py
 ```
 
 ```python
@@ -78,61 +90,31 @@ crawlers/
 from crawlers import ptt_crawler
 from crawlers import crawler_finmind
 from crawlers import crawler_hahow_course
-
-# 手動呼叫
-result = ptt_crawler("Tech_Job")
-print(result)
 ```
 
-### `if __name__ == "__main__"` 的作用
+## EP02 結束後的專案狀態
 
-```python
-# crawlers/ptt_crawler.py
-def ptt_crawler(board):
-    ...
+相比 EP01，新增了：
 
-# 只有直接執行才跑，被 import 時不跑
-if __name__ == "__main__":
-    result = ptt_crawler("Stock")
-    print(result)
-```
+| 檔案 / 資料夾 | 說明 | EP01 就有？ |
+|--------------|------|:---------:|
+| `crawlers/` | 整理後的 Python Package | 新增 |
+| `crawlers/__init__.py` | Package 匯出設定 | 新增 |
+| `pyproject.toml` | uv 專案設定（dependencies） | 新增 |
+| `uv.lock` | 套件版本鎖定 | 新增 |
+| `.python-version` | Python 版本設定 | 新增 |
+| `.gitignore` | Git 忽略規則 | 新增 |
 
-| 情境 | `__name__` 的值 | 底部程式碼會跑嗎 |
-|------|----------------|----------------|
-| `python ptt_crawler.py`（直接執行） | `"__main__"` | ✅ 會跑 |
-| `from crawlers import ptt_crawler`（被 import） | `"ptt_crawler"` | ❌ 不會跑 |
+## 詳細指南
 
-### `__init__.py` 的作用
+- [Git GitHub 開發協作手冊](../Git_GitHub開發協作手冊.md)（Branch → PR → Review & Merge → 團隊協作）
+- [操作手冊 — 環境建置](../操作手冊_EP01-04_完整路線.md)（uv 完整教學 + Module/Package 詳解）
 
-```python
-# crawlers/__init__.py
-from .ptt_crawler import ptt_crawler
-from .finmind import crawler_finmind
-from .hahow_crawler import crawler_hahow_course
-```
+## 常見問題
 
-- **標記**：告訴 Python 這個資料夾是 package
-- **匯出**：把函式「往上提」，讓使用者可以 `from crawlers import ptt_crawler` 直接拿到函式
-
-## 檔案說明
-
-| 檔案 | 說明 |
+| 問題 | 解法 |
 |------|------|
-| `ptt_crawler.py` | PTT 看板爬蟲（原始版，底部會直接跑） |
-| `finmind.py` | FinMind 股票資料查詢（原始版） |
-| `hahow_crawler.py` | Hahow 課程爬蟲（原始版） |
-| `crawlers/` | 整理後的 package（加了 `if __name__` + `__init__.py`） |
-| `pyproject.toml` | uv 專案設定（dependencies） |
-| `uv.lock` | 套件版本鎖定 |
-| `.python-version` | Python 版本設定 |
-| `requirements.txt` | pip 用的套件清單（備用） |
-
-## uv vs pip 對照
-
-| 功能 | uv | pip |
-|------|-----|-----|
-| 安裝套件 | `uv add pandas` | `pip install pandas` |
-| 移除套件 | `uv remove pandas` | `pip uninstall pandas` |
-| 建虛擬環境 | `uv venv --python 3.10` | `python -m venv .venv` |
-| 執行程式 | `uv run main.py` | `python main.py` |
-| 鎖定版本 | `uv.lock`（自動） | `pip freeze > requirements.txt` |
+| `uv: command not found` | `source ~/.bashrc` 或重新安裝 uv |
+| `uv sync` 失敗 | 確認在有 `pyproject.toml` 的目錄下 |
+| `ModuleNotFoundError` | 用 `uv run python` 執行，不是直接 `python` |
+| import 時爬蟲自動跑了 | 檢查 .py 底部有沒有加 `if __name__ == "__main__"` |
