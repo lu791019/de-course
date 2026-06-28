@@ -16,7 +16,32 @@ docker compose version    # Docker Compose version v2+（v5.2.0）
 docker run hello-world    # 看到 Hello from Docker!
 ```
 
-如果 `docker ps` 要加 `sudo` 才能跑 → 你還沒設好 docker 群組，回去看《Docker 安裝教學手冊》Step 7。
+如果 `docker ps` 要加 `sudo` 才能跑 → docker 群組還沒生效，照以下步驟處理：
+
+```bash
+# Step 1：把用戶加入 docker 群組
+sudo usermod -aG docker $USER
+```
+
+```
+# Step 2：關閉 WSL 讓群組生效（在 Windows PowerShell 執行，不是在 Ubuntu 裡）
+1. 關閉所有 Ubuntu / WSL 視窗
+2. 開啟 Windows PowerShell（開始選單搜尋 PowerShell）
+3. 輸入：wsl --shutdown
+4. 等 5 秒
+5. 重新從開始選單打開 Ubuntu
+```
+
+```bash
+# Step 3：驗證（重開 Ubuntu 後）
+groups
+# 列出的群組中應該包含 docker
+
+docker ps
+# 不用 sudo 能跑 = 成功
+```
+
+> ⚠️ 只在 Ubuntu 裡 `exit` 再開是**不夠的**，一定要在 PowerShell 跑 `wsl --shutdown` 完全關閉 WSL 再重開。
 
 > 📁 **重要**：所有實作都在 WSL 原生路徑（`~/`）下做，**不要在 `/mnt/c/`**（會慢 3-5 倍且檔案監聽失效）。
 
