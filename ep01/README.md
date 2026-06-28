@@ -104,7 +104,7 @@ clone 下來後，你的 `de-test/` 裡會有這些檔案：
 
 如果遇到問題，參考完整的安裝手冊：
 
-- [操作手冊 — 環境建置](../操作手冊_EP01-04_完整路線.md)（WSL 安裝步驟 + Linux 指令 + VS Code 設定）
+- [操作手冊 — 環境建置](../操作手冊_環境建置.md)（WSL 安裝步驟 + Linux 指令 + VS Code 設定）
 - [Git GitHub 開發協作手冊](../Git_GitHub開發協作手冊.md)（Git 基礎操作 + VS Code GUI）
 
 ## 常見問題

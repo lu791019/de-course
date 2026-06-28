@@ -8,8 +8,8 @@
 
 | EP | 主題 | 資料夾 | 操作手冊 |
 |----|------|--------|---------|
-| EP01 | WSL + VS Code + Git | [ep01/](ep01/) | [環境建置](操作手冊_EP01-04_完整路線.md) |
-| EP02 | Git + GitHub + uv + Module/Package | [ep02/](ep02/) | [環境建置](操作手冊_EP01-04_完整路線.md) · [Git 協作](Git_GitHub開發協作手冊.md) |
+| EP01 | WSL + VS Code + Git | [ep01/](ep01/) | [環境建置](操作手冊_環境建置.md) |
+| EP02 | Git + GitHub + uv + Module/Package | [ep02/](ep02/) | [環境建置](操作手冊_環境建置.md) · [Git 協作](Git_GitHub開發協作手冊.md) |
 | EP03 | Docker 安裝 + Dockerfile | [ep03-04/](ep03-04/) | [Docker 安裝](Docker安裝教學手冊.md) · [Docker 操作](Docker_Compose開發操作手冊.md) |
 | EP04 | Docker Compose + 完整系統 | [ep03-04/](ep03-04/) | [Docker 實作](Docker實作操作手冊.md) |
 
@@ -17,16 +17,16 @@
 
 | Repo | 內容 | 用在哪 |
 |------|------|--------|
-| [de-project-course](https://github.com/lu791019/de-project-course) | Hahow 課程爬蟲（Celery + RabbitMQ + MySQL） | EP04 橋接：第一次跑完整系統 |
-| [crawler](https://github.com/TibameSam/crawler) | FinMind 股價爬蟲（主力專案，涵蓋多 Queue、Scheduler、GCP） | EP05+ 主力 |
+| [de-project-course](https://github.com/lu791019/de-project-course) | Hahow 課程爬蟲（Celery + RabbitMQ + MySQL + Airflow + BigQuery + Metabase） | EP05+ 主力 |
+| [crawler](https://github.com/TibameSam/crawler) | FinMind 股價爬蟲（多 Queue、Scheduler） | 對照參考 |
 
-> crawler 和 de-project-course 是**同一套架構、不同資料源**。課堂以 crawler 為主要動手專案，de-project-course 作為對照參考。
+> 課堂以 **de-project-course** 為主要動手專案（涵蓋 EP04-20），crawler 作為對照參考。兩者是同一套架構、不同資料源。
 
 ## 操作手冊
 
 | 手冊 | 內容 | 什麼時候看 |
 |------|------|-----------|
-| [操作手冊](操作手冊_EP01-04_完整路線.md) | WSL → VS Code → Git → uv → Module/Package | EP01-02 跟著做 |
+| [操作手冊](操作手冊_環境建置.md) | WSL → VS Code → Git → uv → Module/Package | EP01-02 跟著做 |
 | [Docker 安裝手冊](Docker安裝教學手冊.md) | Docker Engine 安裝 + FAQ 26 題 + 課前預載 | 安裝 Docker 時 |
 | [Docker 操作手冊](Docker_Compose開發操作手冊.md) | Daemon + Nginx 部署 + Port + Restart + Compose | Docker 日常操作 |
 | [Docker 實作手冊](Docker實作操作手冊.md) | Dockerfile → Compose 多服務 → DockerHub → Portainer | Docker 實作課 |
@@ -80,7 +80,7 @@ docker compose down         # 停止
 ```
 de-test/
 ├── README.md                          ← 你在這裡
-├── 操作手冊_EP01-04_完整路線.md
+├── 操作手冊_環境建置.md
 ├── Docker安裝教學手冊.md
 ├── Docker實作操作手冊.md
 ├── Docker_Compose開發操作手冊.md

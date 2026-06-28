@@ -108,7 +108,7 @@ from crawlers import crawler_hahow_course
 ## 詳細指南
 
 - [Git GitHub 開發協作手冊](../Git_GitHub開發協作手冊.md)（Branch → PR → Review & Merge → 團隊協作）
-- [操作手冊 — 環境建置](../操作手冊_EP01-04_完整路線.md)（uv 完整教學 + Module/Package 詳解）
+- [操作手冊 — 環境建置](../操作手冊_環境建置.md)（uv 完整教學 + Module/Package 詳解）
 
 ## 常見問題
 
