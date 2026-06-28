@@ -9,6 +9,8 @@
 | [操作手冊](操作手冊_EP01-04_完整路線.md) | EP01-04 從零到 Docker 完整路線（WSL → VS Code → Git → Python → uv → Docker → Compose）| 學生跟著做 |
 | [Docker 安裝教學手冊](Docker安裝教學手冊.md) | Docker Engine 安裝（WSL + Mac）、systemd、FAQ 26 題、課前預載清單 | 安裝 Docker 時看 |
 | [Docker 實作操作手冊](Docker實作操作手冊.md) | Docker 基本操作 → Dockerfile → Compose（ep03-04 + de-project-course）→ DockerHub → Portainer | Docker 實作時看 |
+| [Docker Compose 開發操作手冊](Docker_Compose開發操作手冊.md) | Docker Daemon → Nginx 部署 → Port → Restart 策略 → Compose 操作 → 指令速查 | Docker 日常開發 |
+| [Git GitHub 開發協作手冊](Git_GitHub開發協作手冊.md) | Git 基礎 → VS Code GUI → Branch → PR → Review & Merge → 團隊協作 | Git 協作流程 |
 
 ## 課程進度對應
 
@@ -94,6 +96,8 @@ de-test/
 ├── 操作手冊_EP01-04_完整路線.md
 ├── Docker安裝教學手冊.md
 ├── Docker實作操作手冊.md
+├── Docker_Compose開發操作手冊.md
+├── Git_GitHub開發協作手冊.md
 ├── ep01/                              ← EP01 原始檔案
 ├── ep02/                              ← EP02 + crawlers package + uv
 │   ├── crawlers/
