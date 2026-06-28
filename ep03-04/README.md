@@ -7,7 +7,7 @@
 | 段落 | 內容 |
 |------|------|
 | EP03 上午 | Docker 概念 → 安裝 Docker Engine → Dockerfile → Build + Run |
-| EP04 下午 | Docker Compose 概念 → 4 服務 infra → de-project-course 完整系統 |
+| EP04 下午 | Docker Compose 概念 → 4 服務 infra → hahow-crawler 完整系統 |
 
 ## 環境需求：安裝 Docker Engine
 
@@ -54,7 +54,7 @@ docker run hello-world    # 預期：Hello from Docker!
 ### Dockerfile — Build + Run
 
 ```bash
-cd ~/de-01-projects/de-test/ep03-04
+cd ~/de-01-projects/de-course/ep03-04
 
 # Build image
 docker build -t test-app .
@@ -131,9 +131,9 @@ CMD ["/bin/bash"]                  # 預設開 bash
 
 本資料夾使用**整合版** docker-compose.yml（所有服務寫在同一個檔案）。
 
-[de-project-course](https://github.com/lu791019/de-project-course) 有**拆開版**（每個服務一個 compose file）。差別：
+[hahow-crawler](https://github.com/lu791019/hahow-crawler) 有**拆開版**（每個服務一個 compose file）。差別：
 
-| | 整合版（本資料夾） | 拆開版（de-project-course） |
+| | 整合版（本資料夾） | 拆開版（hahow-crawler） |
 |---|---|---|
 | 啟動 | `docker compose up` 一行 | 每個服務各一行 |
 | network | 自動建 | 手動 `docker network create` |

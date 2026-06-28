@@ -562,7 +562,7 @@ git push
 
 ```bash
 # 1. 網路問題
-git clone https://github.com/lu791019/de-test.git
+git clone https://github.com/lu791019/de-course.git
 # fatal: unable to access → 確認網路連線
 
 # 2. Private repo 需要認證

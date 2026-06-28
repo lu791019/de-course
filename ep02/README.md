@@ -30,7 +30,7 @@ uv --version        # 預期：uv 0.x.x
 ### 用 uv 管理本專案
 
 ```bash
-cd ~/de-01-projects/de-test/ep02
+cd ~/de-01-projects/de-course/ep02
 
 # 根據 pyproject.toml + uv.lock 安裝所有套件
 uv sync

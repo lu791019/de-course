@@ -73,8 +73,8 @@ git --version
 ```bash
 cd ~
 mkdir de-01-projects && cd de-01-projects
-git clone https://github.com/lu791019/de-test.git
-cd de-test
+git clone https://github.com/lu791019/de-course.git
+cd de-course
 code .
 ```
 
@@ -87,7 +87,7 @@ git config --global user.email "你的email"
 
 ## EP01 結束後的專案狀態
 
-clone 下來後，你的 `de-test/` 裡會有這些檔案：
+clone 下來後，你的 `de-course/` 裡會有這些檔案：
 
 | 檔案 | 說明 |
 |------|------|

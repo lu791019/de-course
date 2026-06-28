@@ -17,10 +17,10 @@
 
 | Repo | 內容 | 用在哪 |
 |------|------|--------|
-| [crawler](https://github.com/TibameSam/crawler) | FinMind 股價爬蟲（漸進式教學設計，中文註解） | EP05+ 實作（學生動手） |
-| [de-project-course](https://github.com/lu791019/de-project-course) | Hahow 課程爬蟲（Airflow + BigQuery + Metabase 完整 pipeline） | 投影片教學（概念對照） |
+| [stock-crawler](https://github.com/lu791019/stock-crawler) | FinMind 股價爬蟲（漸進式教學設計，中文註解） | EP05+ 實作（學生動手） |
+| [hahow-crawler](https://github.com/lu791019/hahow-crawler) | Hahow 課程爬蟲（Airflow + BigQuery + Metabase 完整 pipeline） | 投影片教學（概念對照） |
 
-> 課堂以 **crawler** 為動手實作專案（簡單、漸進），**de-project-course** 用於投影片概念講解。兩者是同一套架構、不同資料源。
+> 課堂以 **crawler** 為動手實作專案（簡單、漸進），**hahow-crawler** 用於投影片概念講解。兩者是同一套架構、不同資料源。
 
 ## 操作手冊
 
@@ -47,8 +47,8 @@ sudo apt install python3-pip python3-venv git -y
 ```bash
 cd ~
 mkdir de-01-projects && cd de-01-projects
-git clone https://github.com/lu791019/de-test.git
-cd de-test
+git clone https://github.com/lu791019/de-course.git
+cd de-course
 ```
 
 ### 3. Python 環境（EP02）
@@ -69,7 +69,7 @@ uv run python ptt_crawler.py
 ```bash
 # 安裝 Docker Engine（完整步驟見 Docker安裝教學手冊.md）
 # 安裝完成後：
-cd ~/de-01-projects/de-test/ep03-04
+cd ~/de-01-projects/de-course/ep03-04
 docker compose up -d        # 起 4 個 infra 服務
 docker compose ps           # 確認全部 running
 docker compose down         # 停止
@@ -78,7 +78,7 @@ docker compose down         # 停止
 ## 專案結構
 
 ```
-de-test/
+de-course/
 ├── README.md                          ← 你在這裡
 ├── 操作手冊_環境建置.md
 ├── Docker安裝教學手冊.md
