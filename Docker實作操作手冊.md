@@ -1,4 +1,4 @@
-# Docker 實作操作手冊（EP03–04）
+# Docker 實作操作手冊
 
 > 對象：已照《Docker 安裝教學手冊》裝好 Docker 的學員
 > 涵蓋：Docker 基本操作 → Dockerfile 實作 → 真實專案 → Docker Compose（整合版 + 分開版）→ DockerHub → Portainer
