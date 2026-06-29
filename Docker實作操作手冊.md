@@ -52,7 +52,7 @@ docker ps
 - [第一部分：Docker 基本操作](#第一部分docker-基本操作)
 - [第二部分：Dockerfile 實作 FastAPI](#第二部分dockerfile-實作-fastapi)
 - [第三部分：de-course 真實專案 Dockerfile](#第三部分de-course-真實專案-dockerfile)
-- [第四部分：ep03-04 Docker Compose](#第四部分ep03-04-docker-compose)
+<!-- - [第四部分：ep03-04 Docker Compose](#第四部分ep03-04-docker-compose) -->
 - [第五部分：hahow-crawler 前置](#第五部分hahow-crawler-前置)
 - [第六部分：hahow-crawler 分開版](#第六部分hahow-crawler-分開版)
 - [第七部分：hahow-crawler 整合版 A](#第七部分hahow-crawler-整合版-a)
@@ -350,6 +350,7 @@ docker ps -a    # 看到剛才的 test-app container（Exited）
 
 ---
 
+<!--
 ## 第四部分：ep03-04 Docker Compose
 
 de-course 的 `ep03-04/docker-compose.yml` 只包含 **4 個基礎服務**（不含 worker/producer）。適合教 Compose 基本概念。
@@ -417,7 +418,7 @@ volumes:
 | 服務 | Image | Port | 用途 |
 |------|-------|------|------|
 | rabbitmq | rabbitmq:3-management | 5672 / 15672 | 訊息佇列（管理介面 15672）|
-| flower | mher/flower | 5555 | Celery 任務監控 |
+| flower | mher/flower:latest | 5555 | Celery 任務監控 |
 | mysql | mysql:8.0 | 3306 | 資料庫 |
 | phpmyadmin | phpmyadmin/phpmyadmin:5.2 | 8000 | 資料庫管理介面 |
 
@@ -505,6 +506,8 @@ docker compose down -v
 # 連 volume（資料庫資料）也一起刪
 ```
 
+-->
+
 ---
 
 ## 第五部分：hahow-crawler 前置
@@ -538,8 +541,8 @@ ls
 
 | 服務 | Image | Port | 角色 |
 |------|-------|------|------|
-| rabbitmq | rabbitmq:3-management | 5672 / 15672 | 訊息佇列（派工）|
-| flower | mher/flower | 5555 | Celery 任務監控 |
+| rabbitmq | rabbitmq:3.13-management-alpine | 5672 / 15672 | 訊息佇列（派工）|
+| flower | mher/flower:latest | 5555 | Celery 任務監控 |
 | mysql | mysql:8.0 | 3306 | 資料庫（存爬蟲結果）|
 | phpmyadmin | phpmyadmin:latest | 8000 | 資料庫管理介面 |
 | worker | enzochang/data_ingestion 或本地 build | — | 執行爬蟲（Celery Worker）|
