@@ -13,14 +13,14 @@
 | EP03 | Docker 安裝 + Dockerfile | [ep03-04/](ep03-04/) | [Docker 安裝](Docker安裝教學手冊.md) · [Docker 操作](Docker_Compose開發操作手冊.md) |
 | EP04 | Docker Compose + 完整系統 | [ep03-04/](ep03-04/) | [Docker 實作](Docker實作操作手冊.md) |
 
-### Season 1+：爬蟲系統（EP05+）
+### Season 1+：爬蟲系統（EP05 開始）
 
-| Repo | 內容 | 用在哪 |
-|------|------|--------|
-| [stock-crawler](https://github.com/lu791019/stock-crawler-de-course-materials) | FinMind 股價爬蟲（漸進式教學設計，中文註解） | EP05+ 實作（學生動手） |
-| [hahow-crawler](https://github.com/lu791019/hahow-crawler-de-course-materials) | Hahow 課程爬蟲（Airflow + BigQuery + Metabase 完整 pipeline） | 投影片教學（概念對照） |
+| Repo | 主題 | 
+|------|------|
+| [stock-crawler](https://github.com/lu791019/stock-crawler-de-course-materials) | FinMind MVP 股價爬蟲（漸進式教學設計，中文註解） | 
+| [hahow-crawler](https://github.com/lu791019/hahow-crawler-de-course-materials) | Hahow 課程爬蟲（Airflow + BigQuery 完整 pipeline） | 
 
-> 課堂以 **crawler** 為動手實作專案（簡單、漸進），**hahow-crawler** 用於投影片概念講解。兩者是同一套架構、不同資料源。
+> 課堂會擇一來教學和實作
 
 ## 操作手冊
 
@@ -29,30 +29,30 @@
 | [操作手冊](操作手冊_環境建置.md) | WSL → VS Code → Git → uv → Module/Package | EP01-02 跟著做 |
 | [Docker 安裝手冊](Docker安裝教學手冊.md) | Docker Engine 安裝 + FAQ 26 題 + 課前預載 | 安裝 Docker 時 |
 | [Docker 操作手冊](Docker_Compose開發操作手冊.md) | Daemon + Nginx 部署 + Port + Restart + Compose | Docker 日常操作 |
-| [Docker 實作手冊](Docker實作操作手冊.md) | Dockerfile → Compose 多服務 → DockerHub → Portainer | Docker 實作課 |
+| [Docker 實作手冊](Docker實作手冊.md) | Dockerfile → Compose 多服務 → DockerHub → Portainer | Docker 實作課 |
 | [Git 協作手冊](Git_GitHub開發協作手冊.md) | Git 基礎 + VS Code GUI + Branch + PR + 團隊協作 | Git 協作流程 |
 
 ## 快速開始
 
 ### 1. 環境準備（EP01）
 
-```bash
-# WSL Ubuntu Terminal
-sudo apt update && sudo apt upgrade -y
-sudo apt install python3-pip python3-venv git -y
-```
+WSL → VS Code → Git : [操作手冊](操作手冊_環境建置.md) 
+Git 基礎 + VS Code GUI + Branch + PR + 團隊協作 & Git 協作流程 : [Git 協作手冊](Git_GitHub開發協作手冊.md) 
+
 
 ### 2. Clone 本 repo
 
 ```bash
 cd ~
-mkdir de-01-projects && cd de-01-projects
+mkdir de-project && cd de-project
 git clone https://github.com/lu791019/de-course.git
 cd de-course
 ```
 
 ### 3. Python 環境（EP02）
 
+ uv → Module/Package : [操作手冊](操作手冊_環境建置.md) 
+ 
 ```bash
 # 安裝 uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -74,6 +74,10 @@ docker compose up -d        # 起 4 個 infra 服務
 docker compose ps           # 確認全部 running
 docker compose down         # 停止
 ```
+| [Docker 安裝手冊](Docker安裝教學手冊.md) | Docker Engine 安裝 + FAQ 26 題 + 課前預載 | 安裝 Docker 時 |
+| [Docker 操作手冊](Docker_Compose開發操作手冊.md) | Daemon + Nginx 部署 + Port + Restart + Compose | Docker 日常操作 |
+| [Docker 實作手冊](Docker實作手冊.md) | Dockerfile → Compose 多服務 → DockerHub → Portainer | Docker 實作課 |
+
 
 ## 專案結構
 
@@ -92,7 +96,7 @@ de-course/
 │   └── uv.lock
 └── ep03-04/                           ← EP03-04：Docker
     ├── Dockerfile
-    ├── docker-compose.yml             ← 4 服務 infra
+    ├── docker-compose.yml             
     ├── crawlers/
     ├── pyproject.toml
     └── uv.lock
